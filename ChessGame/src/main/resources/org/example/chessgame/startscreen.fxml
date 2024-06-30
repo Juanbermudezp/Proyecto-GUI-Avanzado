@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" prefHeight="207.0" prefWidth="314.0" spacing="10" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.chessgame.StartScreenController">
+    <children>
+        <Label text="Ingrese el nombre del Jugador Blanco" />
+        <TextField fx:id="nombreBlanco" />
+        <Label text="Ingrese el nombre del Jugador Negro" />
+        <TextField fx:id="nombreNegro" />
+        <Button onAction="#handleStart" text="Iniciar Juego" />
+    </children>
+</VBox>
