@@ -66,8 +66,8 @@ public class ChessController {
     // Duraciones de los sonidos en segundos
     private final double duracionMovimiento = 2.0;
     private final double duracionErrorMovimiento = 2.0;
-    private final double duracionJaqueSonido = 2.0;
-    private final double duracionSonidoGanador = 2.0;
+    private final double duracionJaqueSonido = 4.0;
+    private final double duracionSonidoGanador = 6.0;
 
     public void setJugadorBlanco(String nombreJugadorBlanco) {
         this.nombreJugadorBlanco = nombreJugadorBlanco;
