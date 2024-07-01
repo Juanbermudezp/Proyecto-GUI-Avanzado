@@ -13,7 +13,6 @@ public class Reina extends Pieza {
         int hastaFila = Character.getNumericValue(hasta.charAt(1)) - 1;
         int hastaCol = hasta.charAt(0) - 'a';
 
-        // Movimiento horizontal, vertical o diagonal
         if (desdeFila == hastaFila || desdeCol == hastaCol || Math.abs(desdeFila - hastaFila) == Math.abs(desdeCol - hastaCol)) {
             int filaIncremento = Integer.compare(hastaFila, desdeFila);
             int colIncremento = Integer.compare(hastaCol, desdeCol);
