@@ -7,6 +7,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.util.Duration;
 import org.example.chessgame.gestion.GestorJuego;
 import org.example.chessgame.gestion.Jugador;
 import org.example.chessgame.gestion.Tablero;
@@ -19,10 +20,9 @@ import java.util.Map;
 public class ChessController {
 
     private MediaPlayer jaqueMateGanador;
-
     private MediaPlayer errorMovimiento;
-
     private MediaPlayer movimiento;
+    private MediaPlayer jaqueSonido;
 
     @FXML
     private VBox chessBoard;
@@ -59,6 +59,15 @@ public class ChessController {
     private Button selectedPiece = null;
     private String selectedPosition = null;
     private boolean gameFinished = false;
+
+    private final String lightColor = "#F0D9B5";
+    private final String darkColor = "#B58863";
+
+    // Duraciones de los sonidos en segundos
+    private final double duracionMovimiento = 2.0;
+    private final double duracionErrorMovimiento = 2.0;
+    private final double duracionJaqueSonido = 2.0;
+    private final double duracionSonidoGanador = 2.0;
 
     public void setJugadorBlanco(String nombreJugadorBlanco) {
         this.nombreJugadorBlanco = nombreJugadorBlanco;
@@ -164,6 +173,14 @@ public class ChessController {
             } else {
                 btn.setStyle("");
             }
+
+            int row = Character.getNumericValue(pos.charAt(1)) - 1;
+            int col = pos.charAt(0) - 'a';
+            if ((row + col) % 2 == 0) {
+                btn.setStyle(btn.getStyle() + "-fx-background-color: " + lightColor + ";");
+            } else {
+                btn.setStyle(btn.getStyle() + "-fx-background-color: " + darkColor + ";");
+            }
         }
     }
 
@@ -182,47 +199,70 @@ public class ChessController {
                 if (pieza != null && pieza.getColor().equals(gestorJuego.getJugadorActual().getColor())) {
                     selectedPiece = clickedButton;
                     selectedPosition = position;
-                    clickedButton.setStyle("-fx-border-color: red;");
+                    clickedButton.setStyle(clickedButton.getStyle() + "-fx-border-color: red;");
                 }
             } else {
-                if (gestorJuego.moverPieza(selectedPosition, position)) {
+                if (position != null && gestorJuego.moverPieza(selectedPosition, position)) {
                     actualizarTablero();
-                    selectedPiece.setStyle("");
+                    selectedPiece.setStyle(selectedPiece.getStyle().replace("-fx-border-color: red;", ""));
                     selectedPiece = null;
                     selectedPosition = null;
 
-                    URL mov = getClass().getResource("/org/example/chessgame/Sonido/Movimiento.mp4");
-                    Media movi = new Media(mov.toExternalForm());
-                    movimiento = new MediaPlayer(movi);
-                    movimiento.play();
+                    URL mov = getClass().getResource("/org/example/chessgame/Sonido/Movimiento.mp3");
+                    if (mov != null) {
+                        Media movi = new Media(mov.toExternalForm());
+                        movimiento = new MediaPlayer(movi);
+                        movimiento.setStopTime(Duration.seconds(duracionMovimiento));
+                        movimiento.play();
+                    } else {
+                        System.err.println("No se encontró el archivo de sonido de movimiento");
+                    }
 
                     if (gestorJuego.estaEnJaqueMate(gestorJuego.getJugadorActual().getColor())) {
-                        URL ganador = getClass().getResource("/org/example/chessgame/Sonido/SonidoGanador.mp4");
-                        Media jaqueMate = new Media(ganador.toExternalForm());
-                        jaqueMateGanador = new MediaPlayer(jaqueMate);
-                        jaqueMateGanador.play();
-                        mostrarMensaje("¡Jaque mate!", "Ha ganado " + (gestorJuego.getJugadorActual().getColor().equals("blanco") ? nombreJugadorNegro : nombreJugadorBlanco));
+                        URL ganador = getClass().getResource("/org/example/chessgame/Sonido/SonidoGanador.mp3");
+                        if (ganador != null) {
+                            Media jaqueMate = new Media(ganador.toExternalForm());
+                            jaqueMateGanador = new MediaPlayer(jaqueMate);
+                            jaqueMateGanador.setStopTime(Duration.seconds(duracionSonidoGanador));
+                            jaqueMateGanador.play();
+                        } else {
+                            System.err.println("No se encontró el archivo de sonido de jaque mate");
+                        }
+                        mostrarMensaje("¡Jaque mate!", "Ha ganado " + (gestorJuego.getJugadorActual().getColor().equals("blanco") ? nombreJugadorNegro : nombreJugadorBlanco), Alert.AlertType.INFORMATION);
                         gameFinished = true;
                     } else if (gestorJuego.estaEnJaque(gestorJuego.getJugadorActual().getColor())) {
-                        mostrarMensaje("¡Jaque!", "Las piezas " + gestorJuego.getJugadorActual().getColor() + " están en jaque.");
+                        URL jaque = getClass().getResource("/org/example/chessgame/Sonido/jaquesonido.mp3");
+                        if (jaque != null) {
+                            Media jaqueMedia = new Media(jaque.toExternalForm());
+                            jaqueSonido = new MediaPlayer(jaqueMedia);
+                            jaqueSonido.setStopTime(Duration.seconds(duracionJaqueSonido));
+                            jaqueSonido.play();
+                        } else {
+                            System.err.println("No se encontró el archivo de sonido de jaque");
+                        }
+                        mostrarMensaje("¡Jaque!", "Las piezas " + gestorJuego.getJugadorActual().getColor() + " están en jaque.", Alert.AlertType.WARNING);
                     } else {
                         updateTurnLabel();
                     }
                 } else {
-                        URL error = getClass().getResource("/org/example/chessgame/Sonido/ErrorDeMovimiento.mp4");
+                    URL error = getClass().getResource("/org/example/chessgame/Sonido/ErrorDeMovimiento.mp3");
+                    if (error != null) {
                         Media errorMov = new Media(error.toExternalForm());
                         errorMovimiento = new MediaPlayer(errorMov);
-                        //errorMovimiento.stop();
+                        errorMovimiento.setStopTime(Duration.seconds(duracionErrorMovimiento));
                         errorMovimiento.play();
-                        selectedPiece.setStyle("");
-                        selectedPiece = null;
-                        selectedPosition = null;
-                        mostrarMensaje("Movimiento inválido", "El movimiento no es válido.");
+                    } else {
+                        System.err.println("No se encontró el archivo de sonido de error de movimiento");
+                    }
+                    selectedPiece.setStyle(selectedPiece.getStyle().replace("-fx-border-color: red;", ""));
+                    selectedPiece = null;
+                    selectedPosition = null;
+                    mostrarMensaje("Movimiento inválido", "El movimiento no es válido.", Alert.AlertType.ERROR);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
-            mostrarMensaje("Error", "Ha ocurrido un error: " + e.getMessage());
+            mostrarMensaje("Error", "Ha ocurrido un error: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
@@ -235,8 +275,8 @@ public class ChessController {
         return null;
     }
 
-    private void mostrarMensaje(String titulo, String contenido) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+    private void mostrarMensaje(String titulo, String contenido, Alert.AlertType tipo) {
+        Alert alert = new Alert(tipo);
         alert.setTitle(titulo);
         alert.setHeaderText("Mensaje");
         alert.setContentText(contenido);
@@ -255,14 +295,21 @@ public class ChessController {
             gameFinished = false;
         } catch (Exception e) {
             e.printStackTrace();
-            mostrarMensaje("Error", "Ha ocurrido un error: " + e.getMessage());
+            mostrarMensaje("Error", "Ha ocurrido un error: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
-    private void updateTurnLabel() {
-        turnLabel.setText("Turno de " + (gestorJuego.getJugadorActual().getColor().equals("blanco") ? nombreJugadorBlanco : nombreJugadorNegro));
-        turnLabel.setVisible(true);
+    @FXML
+    private void handleExit() {
+        System.exit(0);
     }
 
-
+    private void updateTurnLabel() {
+        if (gestorJuego.getJugadorActual().getColor().equals("blanco")) {
+            turnLabel.setText("Turno de " + nombreJugadorBlanco);
+        } else {
+            turnLabel.setText("Turno de " + nombreJugadorNegro);
+        }
+        turnLabel.setVisible(true);
+    }
 }

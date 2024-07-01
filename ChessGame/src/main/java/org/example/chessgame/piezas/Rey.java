@@ -1,9 +1,11 @@
 package org.example.chessgame.piezas;
 
 public class Rey extends Pieza {
+    private boolean haMovido;
 
     public Rey(String color, String imagenURL) {
         super(color, imagenURL);
+        this.haMovido = false;
     }
 
     @Override
@@ -21,6 +23,14 @@ public class Rey extends Pieza {
         }
 
         Pieza piezaDestino = tablero[hastaFila][hastaCol];
-        return piezaDestino == null || !piezaDestino.getColor().equals(this.getColor());
+        if (piezaDestino == null || !piezaDestino.getColor().equals(this.getColor())) {
+            haMovido = true;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean haMovido() {
+        return haMovido;
     }
 }

@@ -42,6 +42,8 @@ public class HelloApplication extends Application {
             controller.setJugadorBlanco(jugadorBlanco);
             controller.setJugadorNegro(jugadorNegro);
 
+            controller.initialize();
+
             primaryStage.show();
         } catch (Exception e) {
             e.printStackTrace();
